@@ -15,3 +15,4 @@ django-envelope==0.7
 django-live-profiler==0.0.9
 redis==2.8.0
 django-redis-metrics==0.7.1
+raven==4.0.3

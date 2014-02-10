@@ -3,13 +3,40 @@ import uuid
 from django.db import models
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
+from django.db.models import Q
 
+
+class DetectorManager(models.Manager):
+    def allowed_detectors(self,user):
+        return self.filter(self.query_allowed_detectors(user)).order_by('-created_at')
+
+    def query_allowed_detectors(self,user):
+        if user.is_authenticated():
+            if user.is_staff:
+                return Q(is_deleted=False)
+            else:
+                return ((Q(author=user.get_profile()) | Q(is_public=True)) &
+                        Q(is_deleted=False))
+        else:
+            return (Q(is_public=True) &
+                    Q(is_deleted=False))
+
+    def search(self, search_term, user):
+        return self.allowed_detectors(user).filter(Q(name__contains=search_term) |
+         Q(author__user__username__contains = search_term))
+
+    def featured_detectors(self):
+        return self.filter(Q(is_featured=True) & Q(is_deleted=False))
+
+    def self_detectors(self,user):
+        return self.allowed_detectors(user).filter(Q(author=user.get_profile())) 
 
 class Detector(models.Model):
     name = models.CharField(max_length=50)
     target_class = models.CharField(max_length=50)
     author = models.ForeignKey('accounts.DetectMeProfile')
     is_public = models.BooleanField(default=False)
+    is_featured = models.BooleanField(default=False)
     average_image = models.ImageField(upload_to='average_image/',
                                       default='defaults/default.png',
                                       null=True, blank=True)
@@ -22,6 +49,8 @@ class Detector(models.Model):
     hash_value = models.CharField(max_length=32, blank=True,
                                   editable=False, unique=True)
     parent = models.ForeignKey('self', null=True, blank=True)
+
+    objects = DetectorManager()
 
     @property
     def average_rating(self):
@@ -111,7 +140,7 @@ class AnnotatedImage(models.Model):
     box_y = models.FloatField()
     box_height = models.FloatField()
     box_width = models.FloatField()
-    location_latitude = models.FloatField()
+    location_latitude  = models.FloatField()
     location_longitude = models.FloatField()
     motion_quaternionX = models.FloatField()
     motion_quaternionY = models.FloatField()

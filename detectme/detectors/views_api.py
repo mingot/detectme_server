@@ -1,20 +1,26 @@
 from datetime import datetime
 from django.conf import settings
 from django.db.models import Q
+from django.core.paginator import Paginator
+
 from rest_framework import generics, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
+
 from redis_metrics import metric
 
 from .models import Detector, Rating, AnnotatedImage
 from .serializers import DetectorSerializer, AnnotatedImageSerializer,\
                           RatingSerializer, SupportVectorSerializer,\
-                          AbuseReportSerializer
-from .views import get_allowed_detectors
+                          AbuseReportSerializer, PaginatedDetectorSerializer
+# from .views import get_allowed_detectors
+
+NUM_ELEMENTS_IN_PAGE = 12
 
 
 class DetectorAPIList(generics.ListCreateAPIView):
     serializer_class = DetectorSerializer
+    paginate_by = None
 
     def pre_save(self, obj):
         DMmetric('api_detectors_create')
@@ -22,9 +28,26 @@ class DetectorAPIList(generics.ListCreateAPIView):
 
     def get_queryset(self):
         DMmetric('api_detectors_list')
-        return (Detector.objects
-                .filter(get_allowed_detectors(self.request.user))
-                .order_by('-created_at'))
+        q = self.request.QUERY_PARAMS
+
+        if 'search' in q:
+            res = Detector.objects.search(q['search'], self.request.user)
+        else:
+            res = Detector.objects.allowed_detectors(self.request.user)
+
+        if 'featured' in q:
+            res = Detector.objects.featured_detectors()
+
+        if 'page' in q:
+            self.paginate_by = NUM_ELEMENTS_IN_PAGE
+
+        if 'private' in q:
+            res = Detector.objects.self_detectors(self.request.user)
+
+
+
+        return res
+               
 
 
 class DetectorAPITimeList(generics.ListAPIView):
@@ -37,7 +60,7 @@ class DetectorAPITimeList(generics.ListAPIView):
     def get_queryset(self):
         uploaded_time = int(self.kwargs['time'])
         uploaded_time = datetime.fromtimestamp(uploaded_time)
-        query = get_allowed_detectors(self.request.user)
+        query = Detector.objects.query_allowed_detectors(self.request.user)
         query = query & Q(uploaded_at__gte=uploaded_time)
         return (Detector.objects.filter(query)
                 .order_by('-created_at'))
@@ -57,7 +80,7 @@ class DetectorAPIDetail(generics.RetrieveUpdateDestroyAPIView):
 
     def get_queryset(self):
         qs = super(DetectorAPIDetail, self).get_queryset()
-        return qs.filter(get_allowed_detectors(self.request.user))
+        return qs.filter(Detector.objects.query_allowed_detectors(self.request.user))
 
 
 class AnnotatedImageAPIList(generics.ListCreateAPIView):

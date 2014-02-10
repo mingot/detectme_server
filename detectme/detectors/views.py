@@ -13,15 +13,15 @@ class DetectorList(ListView):
     template_name = 'detectors/detector_list'
 
     def get_queryset(self):
-        queryset = (Detector.objects
-                    .filter(get_allowed_detectors(self.request.user))
-                    .order_by('-created_at'))
+        queryset = Detector.objects.allowed_detectors(self.request.user)
+
 
         if 'q' in self.request.GET:
             search_term = self.request.GET['q']
-            queryset = queryset.filter(name__contains=search_term)
+            queryset = Detector.objects.search(search_term,self.request.user)
     
         return queryset
+
 
 
 class DetectorDetail(DetailView):
@@ -31,7 +31,7 @@ class DetectorDetail(DetailView):
 
     def get_queryset(self):
         qs = super(DetectorDetail, self).get_queryset()
-        return qs.filter(get_allowed_detectors(self.request.user))
+        return qs.filter(Detector.objects.query_allowed_detectors(self.request.user))
 
     def get_context_data(self, **kwargs):
         # Call the base implementation first to get a context

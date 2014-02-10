@@ -1,4 +1,6 @@
 from rest_framework import serializers
+from rest_framework import pagination
+
 from .models import Detector, AnnotatedImage, Rating, ExtraInfo, AbuseReport
 
 
@@ -20,9 +22,9 @@ class DetectorSerializer(serializers.ModelSerializer):
                   'author', 'is_public', 'average_image',
                   'uploaded_at', 'is_deleted', 'average_rating',
                   'weights', 'sizes', 'parent', 'created_at',
-                  'updated_at', 'number_ratings', 'number_images')
+                  'updated_at', 'number_ratings', 'number_images','is_featured')
         read_only = ('author', 'uploaded_at', 'id', 'average_rating',
-                     'number_ratings', 'number_images')
+                     'number_ratings', 'number_images','is_featured')
 
     def from_native(self, data, files):
         """
@@ -35,6 +37,11 @@ class DetectorSerializer(serializers.ModelSerializer):
         extra_info = ExtraInfo(detector=detector, support_vectors=sv, training_log=tl)
         if not self._errors:
             return self.full_clean(detector)
+
+class PaginatedDetectorSerializer(pagination.PaginationSerializer):
+
+    class Meta:
+        object_serializer_class = DetectorSerializer
 
 
 class AnnotatedImageSerializer(serializers.ModelSerializer):
