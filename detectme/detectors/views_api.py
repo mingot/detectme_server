@@ -56,6 +56,7 @@ class DetectorAPITimeList(generics.ListAPIView):
     Used for just sending last updates
     """
     serializer_class = DetectorSerializer
+    paginate_by = None
 
     def get_queryset(self):
         uploaded_time = int(self.kwargs['time'])
@@ -71,7 +72,8 @@ class DetectorAPIDetail(generics.RetrieveUpdateDestroyAPIView):
     model = Detector
     # permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
                           # IsOwnerOrReadOnly,)
-
+    paginate_by = None
+    
     def pre_save(self, obj):
         DMmetric('api_detectors_update')
         # remove all the images and wait for the new ones to be updated
@@ -86,7 +88,7 @@ class DetectorAPIDetail(generics.RetrieveUpdateDestroyAPIView):
 class AnnotatedImageAPIList(generics.ListCreateAPIView):
     serializer_class = AnnotatedImageSerializer
     model = AnnotatedImage
-
+    paginate_by = None
     def pre_save(self, obj):
         DMmetric('api_annotatedimages_create')
         obj.author = self.request.user.get_profile()
@@ -96,14 +98,14 @@ class AnnotatedImageAPIDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = AnnotatedImageSerializer
     # permission_classes = (permissions.IsAuthenticatedOrReadOnly,
                           # IsOwnerOrReadOnly,)
-
+    paginate_by = None
     def pre_save(self, obj):
         obj.author = self.request.user.get_profile()
 
 
 class AnnotatedImagesForDetector(generics.ListAPIView):
     serializer_class = AnnotatedImageSerializer
-
+    paginate_by = None
     def get_queryset(self):
         # Returns list of AnnotatedImage for the requested detector
         detector = self.kwargs['detector']
@@ -113,7 +115,7 @@ class AnnotatedImagesForDetector(generics.ListAPIView):
 class SupportVectorsForDetector(generics.RetrieveAPIView):
     serializer_class = SupportVectorSerializer
     model = Detector
-
+    
     def get_queryset(self):
         DMmetric('api_supportvectors_list')
         return super(SupportVectorsForDetector, self).get_queryset()
