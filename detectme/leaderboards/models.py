@@ -88,7 +88,9 @@ class UserScore(models.Model):
                 .count())
         return perf
 
+
+
     def __unicode__(self):
         return u'%s: %s entries with max_score %s' % (self.user.username,
                                                       self.num_entries,
-                                                      self.max_score)
+                                                      self.best_performance)
