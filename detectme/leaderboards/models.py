@@ -1,8 +1,9 @@
 from datetime import datetime
 from django.db import models
 from django.db.models import Max
+from django.db.models.signals import post_delete, post_save
 from detectors.models import Detector
-
+from django.dispatch import receiver
 
 class Category(models.Model):
     name = models.CharField(max_length=50)
@@ -94,3 +95,36 @@ class UserScore(models.Model):
         return u'%s: %s entries with max_score %s' % (self.user.username,
                                                       self.num_entries,
                                                       self.best_performance)
+
+class TopImage(models.Model):
+    created_at = models.DateTimeField(null=True, blank=True)
+    uploaded_at = models.DateTimeField(auto_now=True)
+    image_jpeg = models.ImageField(upload_to='top_images/',
+                                   default='average_image/default.jpg')
+    image_height = models.PositiveSmallIntegerField(editable=False, blank=True)
+    image_width = models.PositiveSmallIntegerField(editable=False, blank=True)
+    box_x = models.FloatField()
+    box_y = models.FloatField()
+    box_height = models.FloatField()
+    box_width = models.FloatField()
+    detector = models.ForeignKey(Detector)
+
+    def save(self, *args, **kwargs):
+        self.image_width = self.image_jpeg.width
+        self.image_height = self.image_jpeg.height
+        super(TopImage, self).save(*args, **kwargs)
+
+    def __unicode__(self):
+        return u'%s' % self.image_jpeg.name
+
+
+@receiver(post_delete, sender=TopImage)
+def topImage_post_delete_handler(sender, **kwargs):
+    """
+    Delete associated images when deleting a detector
+    """
+    topImage = kwargs['instance']
+    storage, path = (topImage.image_jpeg.storage,
+                     topImage.image_jpeg.path)
+    storage.delete(path)
+

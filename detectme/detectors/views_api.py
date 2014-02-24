@@ -89,8 +89,9 @@ class AnnotatedImageAPIList(generics.ListCreateAPIView):
     serializer_class = AnnotatedImageSerializer
     model = AnnotatedImage
     paginate_by = None
+
     def pre_save(self, obj):
-        DMmetric('api_annotatedimages_create')
+        #DMmetric('api_annotatedimages_create')
         obj.author = self.request.user.get_profile()
 
 

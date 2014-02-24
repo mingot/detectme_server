@@ -9,6 +9,9 @@ urlpatterns = patterns(
     # post of the detector performance
     url(r'^api/performance/$',
         views_api.PerformanceAPICreate.as_view()),
+    
+    url(r'^api/topimages/$',
+        views_api.TopImageAPIList.as_view()),
 )
 
 # Add suffix to nice access to the detectors.
