@@ -9,7 +9,7 @@ urlpatterns = patterns(
     # post of the detector performance
     url(r'^api/performance/$',
         views_api.PerformanceAPICreate.as_view()),
-    
+
     url(r'^api/topimages/$',
         views_api.TopImageAPIList.as_view()),
 )
@@ -24,6 +24,8 @@ urlpatterns += patterns(
     url(r'^forum/', include('pybb.urls', namespace='pybb')),
     url(r'^$', views.competition_detail, name="competition_detail"),
     url(r'^submissions/$', views.submissions, name='submissions'),
+    url(r'^topimages/$', views.topimages, name='topimages'),
+
     url(r'^category/(?P<category>\w+)/$', views.show_leaderboard, name='leaderboard'),
 
 )

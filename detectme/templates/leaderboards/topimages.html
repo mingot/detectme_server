@@ -1,0 +1,100 @@
+{% extends "leaderboards/base.html" %}
+{% load staticfiles %}
+
+
+{% block extra_css %}
+<style>
+.hiddenRow {padding: 0 !important;}
+.accordion-toggle:hover{background: #DCF7DC!important;}
+
+/*annotated images*/
+.img-container { position: relative; }
+.box { position: absolute;}
+.thumbnail { border:0;}
+</style>
+{% endblock extra_css %}
+
+{% block page_title %}
+<div class="page-header">
+<h1>My Submitted Detectors</h1>
+</div>
+{% endblock page_title %}
+
+
+{% block competition_content %}
+
+{% if performances %}
+<table class="table">
+  <thead>
+    <tr>
+      <th>Detector Name</th>
+      <th>Category</th>
+      <th>AP</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for performance in performances %}
+      <tr data-toggle="collapse" data-target="#collapse{{forloop.counter}}" class="accordion-toggle">
+        <td>{{ performance.detector.name }}</td>
+        <td>{{ performance.category.name }}</td>
+        <td>{{ performance.average_precision }}</td>
+      </tr>
+      <tr >
+          <td colspan="6" class="hiddenRow">
+            <div class="accordian-body collapse" id="collapse{{forloop.counter}}">
+                <ul class="thumbnails">
+
+                {% for annotatedimage in performance.detector.topimage_set.all %}
+                  <li class="span3">
+                    <div class="thumbnail">
+                        <div class="img-container">
+
+                          <div class="box" style="left: {{ annotatedimage.box_x }}px; top: {{ annotatedimage.box_y }}px; width: {{ annotatedimage.box_width }}px; height: {{ annotatedimage.box_height }}px; border: 3px solid red;"></div>
+
+                          <img src="{{ annotatedimage.image_jpeg.url }}" alt="image" height="200" width="200"/>
+
+                        </div>
+                    </div>
+                  </li>
+                {% endfor %}
+                
+                </ul>
+            </div>         
+          </td>
+        </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% else %}
+  <p>You do not have submissions yet!</p>
+{% endif %}
+
+{% endblock competition_content %}
+
+{% block extra_js %}
+    <script>
+      //draw boxes in each annotated image
+      $( window ).load(function(){
+      
+      images = $(".img-container").children("img")
+      boxes = $(".img-container").children(".box")
+
+      for(var i=0; i<images.length; i++){
+        image = images[i];
+        height = image.height;
+        width = image.width;
+
+        box = boxes[i];
+        box.style.left = parseFloat(box.style.left.slice(0,-2))*width + "px";
+        box.style.top = parseFloat(box.style.top.slice(0,-2))*height + "px";
+        box.style.width = parseFloat(box.style.width.slice(0,-2))*width + "px";
+        box.style.height = parseFloat(box.style.height.slice(0,-2))*height + "px";
+
+      }
+    });
+  
+    </script>
+
+
+{% endblock extra_js %}
