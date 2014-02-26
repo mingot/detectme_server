@@ -43,8 +43,13 @@
       </tr>
       <tr >
           <td colspan="6" class="hiddenRow">
-            <div class="accordian-body collapse" id="collapse{{forloop.counter}}">
+            <div class="accordian-body collapse" id="collapse{{forloop.counter}}">      
+                <hr>
+                <h5> Training Set </h5> 
+                <hr>
+
                 <ul class="thumbnails">
+
                 {% for annotatedimage in performance.detector.annotatedimage_set.all %}
                   <li class="span3">
                     <div class="thumbnail">
@@ -55,8 +60,33 @@
                     </div>
                   </li>
                 {% endfor %}
+
+
                 </ul>
-            </div>         
+
+                <hr>
+                <h5> Top Images Detected </h5> 
+                <hr>
+
+                <ul class="thumbnails">
+                {% for annotatedimage in performance.detector.topimage_set.all %}
+                  <li class="span3">
+                    <div class="thumbnail">
+                        <div class="img-container">
+
+                          <div class="box" style="left: {{ annotatedimage.box_x }}px; top: {{ annotatedimage.box_y }}px; width: {{ annotatedimage.box_width }}px; height: {{ annotatedimage.box_height }}px; border: 3px solid red;"></div>
+
+                          <img src="{{ annotatedimage.image_jpeg.url }}" alt="image" height="200" width="200"/>
+
+                        </div>
+                    </div>
+                  </li>
+                {% endfor %}
+                </ul>
+
+
+            </div>  
+
           </td>
         </tr>
     {% endfor %}
