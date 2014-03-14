@@ -52,10 +52,20 @@ class Performance(models.Model):
     def save(self, *args, **kwargs):
         # creates the UserScore entry and save category and detector_author
         name = self.detector.name
+        index = name.find('competition');
+        #try:
+        #    category = Category.objects.get(name=name.split("_")[0])
+        #except Category.DoesNotExist:
+        #    category = Category.objects.get(name="NA")
+
         try:
-            category = Category.objects.get(name=name.split("_")[0])
+            category = Category.objects.get( name=name[0:(index-1)] )
         except Category.DoesNotExist:
-            category = Category.objects.get(name="NA")
+            try:
+                category = Category.objects.get( name=name[0:(index-2)] )
+            except:
+                category = Category.objects.get(name="NA")
+
         self.category = category
         self.detector_author = self.detector.author
         user_score = UserScore.objects.get_or_create(user=self.detector.author,
