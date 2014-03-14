@@ -63,7 +63,7 @@ class Performance(models.Model):
         except Category.DoesNotExist:
             try:
                 category = Category.objects.get( name=name[0:(index-2)] )
-            except:
+            except Category.DoesNotExist:
                 category = Category.objects.get(name="NA")
 
         self.category = category
