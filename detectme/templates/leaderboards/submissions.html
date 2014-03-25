@@ -29,7 +29,7 @@
     <tr>
       <th>Detector Name</th>
       <th>Category</th>
-      <th>AP</th>
+      <th>Score</th>
       <th>Num Images</th>
     </tr>
   </thead>
@@ -38,7 +38,7 @@
       <tr data-toggle="collapse" data-target="#collapse{{forloop.counter}}" class="accordion-toggle">
         <td>{{ performance.detector.name }}</td>
         <td>{{ performance.category.name }}</td>
-        <td>{{ performance.average_precision }}</td>
+        <td>{{ 100*performance.average_precision }}</td>
         <td>{{ performance.detector.annotatedimage_set.all|length }}</td>
       </tr>
       <tr >
