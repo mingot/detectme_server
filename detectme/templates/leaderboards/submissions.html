@@ -39,7 +39,7 @@
       <tr data-toggle="collapse" data-target="#collapse{{forloop.counter}}" class="accordion-toggle">
         <td>{{ performance.detector.name    }}</td>
         <td>{{ performance.category.name    }}</td>
-        <td>{% widthratio performance.average_precision 1 100 %}</td>
+        <td>{% widthratio performance.average_precision 1 1000 %}</td>
         <td>{{ performance.detector.annotatedimage_set.all|length }}</td>
       </tr>
       <tr >

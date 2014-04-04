@@ -29,7 +29,7 @@
             <td>{{ forloop.counter }}</td>
             <td>{{ team.user.username }}</td>
             <td>{{ team.num_entries }}</td>
-            <td>{% widthratio team.best_performance.average_precision 1 100 %}</td>
+            <td>{% widthratio team.best_performance.average_precision 1 1000 %}</td>
             <td>{{ team.best_performance.detector.annotatedimage_set.all|length }}</td>
           </tr>
         {% endfor %}
